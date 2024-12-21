@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="text-center mb-4">Загружайте видео<br>и аудио из YouTube</h2>
+        <p class="text-center text-muted mb-5">
+            Скачивайте видео из YouTube в HD качестве. Доступны форматы от 360p<br>
+            до 4K. Бесплатный сервис без ограничений.
+        </p>
+
+        <div class="input-group mb-4">
+            <input type="text" id="videoUrl" class="form-control" placeholder="Вставьте ссылку на YouTube видео">
+            <button class="btn btn-dark" type="button" id="searchBtn">Найти</button>
+        </div>
+
+        <div id="videoInfo" class="card d-none mb-4">
+            <img src="" class="card-img-top" id="thumbnail" alt="Video thumbnail">
+            <div class="card-body">
+                <h5 class="card-title" id="videoTitle"></h5>
+                <p class="card-text" id="videoDuration"></p>
+                
+                <select class="form-select mb-3" id="formatSelect">
+                    <option selected disabled>Выберите формат</option>
+                </select>
+
+                <button class="btn btn-dark w-100" id="downloadBtn">Получить ссылку</button>
+
+                <div class="progress mt-3 d-none" id="progressBar">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                
+                <div class="mt-2 text-muted" id="downloadStats"></div>
+            </div>
+        </div>
+
+        <div id="downloadLink" class="alert alert-success d-none">
+            <a href="#" class="alert-link" download>Скачать файл</a>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger d-none">
+        </div>
+    </div>
+</div>
+{% endblock %}
