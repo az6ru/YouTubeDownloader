@@ -66,6 +66,10 @@ def validate_url():
                 'title': info['title'],
                 'thumbnail': info['thumbnail'],
                 'duration': info['duration'],
+                'author': info.get('uploader', 'Unknown'),
+                'upload_date': info.get('upload_date', ''),
+                'description': info.get('description', ''),
+                'view_count': info.get('view_count', 0),
                 'formats': formats
             })
     except Exception as e:

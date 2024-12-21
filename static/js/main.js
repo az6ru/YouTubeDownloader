@@ -5,10 +5,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const elements = {
         videoUrl: document.getElementById('videoUrl'),
         searchBtn: document.getElementById('searchBtn'),
+        loadingState: document.getElementById('loadingState'),
         videoInfo: document.getElementById('videoInfo'),
         thumbnail: document.getElementById('thumbnail'),
         videoTitle: document.getElementById('videoTitle'),
+        videoAuthor: document.getElementById('videoAuthor'),
         videoDuration: document.getElementById('videoDuration'),
+        videoPublished: document.getElementById('videoPublished'),
         formatSelect: document.getElementById('formatSelect'),
         downloadBtn: document.getElementById('downloadBtn'),
         progressBar: document.getElementById('progressBar'),
@@ -22,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        
+
         if (hours > 0) {
             return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
@@ -36,6 +39,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     }
 
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
     function showError(message) {
         elements.errorAlert.textContent = message;
         elements.errorAlert.classList.remove('d-none');
@@ -44,12 +56,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
+    function showLoading(show) {
+        if (show) {
+            elements.loadingState.classList.remove('d-none');
+            elements.videoInfo.classList.add('d-none');
+        } else {
+            elements.loadingState.classList.add('d-none');
+            elements.videoInfo.classList.remove('d-none');
+        }
+    }
+
     elements.searchBtn.addEventListener('click', async function() {
         const url = elements.videoUrl.value.trim();
         if (!url) {
             showError('Пожалуйста, введите URL видео');
             return;
         }
+
+        showLoading(true);
 
         try {
             const response = await fetch('/api/validate', {
@@ -61,12 +85,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const data = await response.json();
-            
+
             if (response.ok) {
                 elements.thumbnail.src = data.thumbnail;
                 elements.videoTitle.textContent = data.title;
+                elements.videoAuthor.textContent = data.author;
                 elements.videoDuration.textContent = formatDuration(data.duration);
-                
+                elements.videoPublished.textContent = formatDate(data.upload_date);
+
                 // Clear and populate format select
                 elements.formatSelect.innerHTML = '<option selected disabled>Выберите формат</option>';
                 data.formats.forEach(format => {
@@ -75,13 +101,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     option.textContent = `${format.quality} (${format.height}p) • ${formatFileSize(format.filesize)}`;
                     elements.formatSelect.appendChild(option);
                 });
-                
+
                 elements.videoInfo.classList.remove('d-none');
             } else {
                 showError(data.error || 'Ошибка при проверке видео');
             }
         } catch (error) {
             showError('Произошла ошибка при обработке запроса');
+        } finally {
+            showLoading(false);
         }
     });
 
@@ -104,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const data = await response.json();
-            
+
             if (response.ok) {
                 currentDownloadId = data.download_id;
                 elements.progressBar.classList.remove('d-none');
